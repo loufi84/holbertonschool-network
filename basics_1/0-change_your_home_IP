@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
-# This script configure localhost to resolve to 127.0.0.1 and facebook.com to 8.8.8.8
+# This script configures localhost to resolve to 127.0.0.2 and facebook.com to 8.8.8.8
 if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root (sudo 0./change_your_home_IP)"
+    echo "Please run as root (sudo ./0-change_your_home_IP)"
     exit 1
 fi
 
 HOSTS_FILE="/etc/hosts"
+TMP_FILE="$(mktemp)"
 
-# Backup the original hosts
+# Backup the original hosts if not already done
 if [ ! -f "${HOSTS_FILE}.bak" ]; then
     cp "$HOSTS_FILE" "${HOSTS_FILE}.bak"
 fi
 
-sed -i '/[[:space:]]localhost$/d' "$HOSTS_FILE"
-sed -i '/[[:space:]]facebook\.com$/d' "$HOSTS_FILE"
+# Filter out existing localhost and facebook.com lines
+grep -vE '[[:space:]]localhost$|[[:space:]]facebook\.com$' "$HOSTS_FILE" > "$TMP_FILE"
 
-echo "127.0.0.2    localhost" >> "$HOSTS_FILE"
-echo "8.8.8.8      facebook.com" >> "$HOSTS_FILE"
+# Add the new mappings
+echo "127.0.0.2    localhost" >> "$TMP_FILE"
+echo "8.8.8.8      facebook.com" >> "$TMP_FILE"
+
+# Replace /etc/hosts
+cat "$TMP_FILE" > "$HOSTS_FILE"
+rm "$TMP_FILE"
