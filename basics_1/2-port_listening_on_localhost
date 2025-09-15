@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Listen on 98 on localhost and outputs anything received
+PORT=98
+HOST=127.0.0.2
+
+echo "Starting my script. Listening on port $HOST:$PORT..."
+nc -l -p "$PORT" -s "$HOST"
